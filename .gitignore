@@ -1,0 +1,5 @@
+/env
+.env
+/.vscode
+/__pycache__
+image_from_base64.jpeg
