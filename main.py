@@ -1,4 +1,6 @@
 import uvicorn
+import json
+import base64
 import xml.etree.ElementTree as ET
 
 from fastapi import FastAPI, Depends, Request
@@ -7,7 +9,7 @@ from sqlalchemy.orm import Session
 
 from database import SessionLocal
 from models import IotBox, IotDevice
-from convert import decode_base64_data
+from convert import decode_base64_data, _SAVEPATH_BASE64
 
 app = FastAPI()
 
@@ -39,6 +41,21 @@ async def service(request: Request, db: Session = Depends(get_db)):
     return "<printer><response success='true'>true</response></printer>"
 
 
+@app.post("/hw_drivers/action")
+async def action(request: Request, db: Session = Depends(get_db)):
+    raw_body = await request.body()
+    body = json.loads(raw_body)
+    print_data = json.loads(body['params']['data'])
+
+    if print_data.get('receipt'):
+        image_receipt = print_data['receipt']
+
+        with open(_SAVEPATH_BASE64, "wb") as fh:
+            fh.write(base64.b64decode(image_receipt))
+
+    return {"status": 'ok', "value": 5.02}
+
+
 @app.get("/hw_proxy/hello")
 def hello(db: Session = Depends(get_db)):
     return "ping"
@@ -47,11 +64,6 @@ def hello(db: Session = Depends(get_db)):
 @app.post("/hw_drivers/event")
 def event(db: Session = Depends(get_db)):
     return {"status": True}
-
-
-@app.post("/hw_drivers/action")
-def action(db: Session = Depends(get_db)):
-    return {"status": 'ok', "value": 5.02}
 
 
 @app.get("/create_iot_device")
