@@ -1,8 +1,6 @@
+import os
 import base64
 import PIL.Image as Image
-
-_SAVEPATH_BASE64 = "/home/odoo/Documents/Dev/FakePrinter/image_from_base64.jpeg"
-
 
 def decode_base64_data(encoded_raster_data, width, height):
     # Decode the base64 string back to a byte array
@@ -19,4 +17,4 @@ def decode_base64_data(encoded_raster_data, width, height):
     image = Image.new("L", (width, height))
     image.putdata(pixels)
 
-    image.save(_SAVEPATH_BASE64, "PNG")
+    image.save(os.getenv("SAVEPATH"), "PNG")
